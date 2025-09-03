@@ -1,0 +1,115 @@
+html, body { margin: 0; }
+
+.main-layout {
+ display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 32px;
+  width: 100%;
+  margin: 0 auto;
+  max-width: 1200px;
+  box-sizing: border-box;
+}
+
+.controls {
+  width: 220px;
+  min-width: 200px;
+  max-width: 220px;
+  background: #e3731da1;
+  padding: 16px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  height: fit-content;
+  box-sizing: border-box;
+  align-items: center;
+}
+
+
+#sketch {
+  flex: 1 1 400px;
+  min-width: 300px;
+  max-width: 700px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 0 16px;
+  background: rgba(255, 154, 39, 0.18);
+  border: 4px solid rgba(255, 154, 39, 0.5);
+  border-radius: 16px;
+  box-sizing: border-box;
+}
+
+body {
+font-family: Arial, sans-serif;
+color: #333;
+text-align: center;
+background-image: url('assets/fish_city.png'); /* DONT FORGET TO CORRECT PATH */
+background-size: cover;
+background-position: center;
+background-attachment: fixed;
+display: flex; /* enable flex layout */
+flex-direction: column; /* stack header, content, footer vertically */
+min-height: 100vh; /* fill the viewport height */
+}
+
+
+
+#inventory-panel {
+  position: static;
+  background: rgba(255, 154, 39, 0.9);
+  border-radius: 10px;
+  padding: 12px 14px;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+  min-width: 180px;
+  text-align: center;
+  margin-top: 16px;
+}
+#inventory-panel h3 {
+  margin: 0 0 8px 0;
+  font-size: 16px;
+}
+#inventory-panel ul {
+  margin: 0;
+  padding-left: 16px;
+}
+
+@media (max-width: 900px) {
+  .main-layout {
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+  }
+  .controls {
+    width: 90vw;
+    max-width: 400px;
+    min-width: 200px;
+    margin: 0 auto;
+  }
+  #sketch {
+    min-width: 300px;
+    max-width: 100vw;
+    margin: 0 auto;
+  }
+}
+
+button {
+  background: #e2a727cd;      /* orange-yellow */
+  color: #222;              /* dark text */
+  border: none;
+  border-radius: 8px;
+  padding: 10px 18px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+  transition: background 0.2s;
+}
+
+button:hover {
+  background: #ff8800;      /* deeper orange on hover */
+  color: #fff;
+}

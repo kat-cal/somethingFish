@@ -1,0 +1,33 @@
+html, body { margin: 0; }
+
+body {
+font-family: Arial, sans-serif;
+color: #333;
+text-align: center;
+background-image: url('assets/jazz.Background.png2.png'); /* DONT FORGET TO CORRECT PATH */
+background-size: cover;
+background-position: center;
+background-attachment: fixed;
+display: flex; /* enable flex layout */
+flex-direction: column; /* stack header, content, footer vertically */
+min-height: 100vh; /* fill the viewport height */
+}
+
+#sketch {
+  margin: 20px auto;
+  border: none;
+  padding: 10px;
+  width: fit-content;
+  background: transparent;
+}
+
+.controls {
+display: inline-flex;
+gap: 12px;
+align-items: center;
+background: rgba(255,255,255,0.75);
+padding: 8px 12px;
+border-radius: 8px;
+backdrop-filter: blur(4px);
+margin: 8px auto 20px; /* spacing above & below controls */
+}
