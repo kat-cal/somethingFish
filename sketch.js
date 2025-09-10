@@ -7,6 +7,9 @@ let img6;
 let img7;
 let img8;
 let img9;
+let envelope;
+let bartender;
+let fishingline;
 let particles = []; // Array to hold all particles
 let circleColor = [255, 215, 0]; // initial color (gold)
 let circleSize = 50;
@@ -37,14 +40,21 @@ function renderInventory() {
     ul.appendChild(li);
     return;
   }
-  inventory.forEach(item => {
+  inventory.forEach((item, idx) => {
     const li = document.createElement('li');
-    li.textContent = item;
+    const btn = document.createElement('button');
+    btn.textContent = item;
+    btn.style.width = '100%';
+    btn.style.margin = '4px 0';
+    btn.addEventListener('click', () => handleInventoryClick(item, idx));
+    li.appendChild(btn);
     ul.appendChild(li);
   });
 }
 
 function preload(){
+  envelope = loadImage('assets/pngtree-top-secret-envelope-note-dossier-label-vector-picture-image_9448898.png');
+  fishingline = loadImage('assets/Fishing_Line_PNG_Clip_Art-2523.png');
   img = loadImage('assets/71rBv3UAaFL.jpg');
   img2 = loadImage('assets/images-for-cartoon-microphone-stand-microphone-stand-clipart-11562931370bnsm3xmmdx.png')
   img3 = loadImage('assets/trompete-coloured-clipart-xl.png');
@@ -54,6 +64,8 @@ function preload(){
   img7 = loadImage('assets/a_hallway_lined_with_framed_photgraphs_of_fancy_fish_the_floor_should_be_a_deep_red_velvet_and_the__exy2yfg6wqru2er1qu0w_1.png');
   img8 = loadImage('assets/dart_board_on_the_wall_hand_drawing_style_but_with_the_typical_red_and_green_colors_for_certain_sec_z85wxu29gykrbwe7p0sw_1.png');
   img9 = loadImage('assets/jazz_band_club_stage_with_deep_crimson_curtains_and_lots_of_dramatic_features_there_should_be_a_dru_d8do4xyblqmhma88ueh8_3.png');
+  img10 = loadImage('assets/front_ofbar.png');
+  bartender = loadImage('assets/fish_bartender.png');
   music = loadSound('assets/loop-file-jazz-waltz-34-beat-bpm132-144689.mp3');
   instrumentImages = [img2, img3, img4, img5];
   
@@ -95,6 +107,11 @@ const soundBtn = document.getElementById('toggle-sound');
 // Next scene
 document.getElementById('next-scene').addEventListener('click', () => {
   currentScene++;
+  if (currentScene === 2) {
+    bartenderX = -400;
+    bartenderArrived = false;
+    showTalkButton = false;
+  }
 });
 
 // (Optional) back button
@@ -159,6 +176,7 @@ function setup() {
 
   keyX = width * 0.25;
   keyY = height * 0.6;
+  bartenderTargetX = width * 0.45; // Almost center
 
   document.getElementById('toggle-inventory').addEventListener('click', () => {
     const panel = document.getElementById('inventory-panel');
@@ -180,30 +198,93 @@ function windowResized() {
 }
 
 function mousePressed() {
-  // (keep your sound play/stop logic if present)
-  // userStartAudio(); etc.
-
-  // Only pick up key in Scene 1 and if not already collected
+  // Only pick up envelope in Scene 1 and if not already collected
   if (currentScene === 1 && !hasKey) {
-    const d = dist(mouseX, mouseY, keyX, keyY);
-    if (d <= keySize * 0.6) {
+    // Envelope center and size
+    const envX = width / 2;
+    const envY = height / 1.5;
+    const envW = keySize * 1.5;
+    const envH = keySize;
+
+    // Check if mouse is inside the envelope image
+    if (
+      mouseX > envX - envW / 2 &&
+      mouseX < envX + envW / 2 &&
+      mouseY > envY - envH / 2 &&
+      mouseY < envY + envH / 2
+    ) {
       hasKey = true;
-      inventory.push('Key');
-      flashMessage('Picked up: Key'); // optional feedback
-      renderInventory();              // update panel if open
+      inventory.push('Mission Statement');
+      flashMessage('Picked up: Mission Statement');
+      renderInventory();
+    }
+  }
+
+  // Bartender talk button in scene 2
+  if (currentScene === 2 && showTalkButton && window.talkBtnBounds) {
+    let b = window.talkBtnBounds;
+    if (
+      mouseX > b.x - b.w / 2 &&
+      mouseX < b.x + b.w / 2 &&
+      mouseY > b.y - b.h / 2 &&
+      mouseY < b.y + b.h / 2
+    ) {
+      showInventoryMessage([
+        'Bartender: <br><em>"Welcome to the club, friend! The jazz is hot and the drinks are cold."</em>',
+        '<em>"If you\'re looking for Tank Finatra, he\'s probably backstage getting ready for his big solo."</em>',
+        '<em>"Ohhh you\'re one of them official sorts eh."</em>',
+        '<em>"Didn\'t hear it from me, but there have been a couple fishy folks around here. Keep your eyes peeled, I think one of them dropped something important."</em>',
+        '<em>"Let me know if you need anything else."</em>',
+    ]);
+    }
+  }
+
+  if (currentScene === 2 && showFishingLine && window.fishingLineBounds && !hasFishingLine) {
+    let b = window.fishingLineBounds;
+    // Simple bounding box check
+    if (
+      mouseX > b.x - b.w / 2 &&
+      mouseX < b.x + b.w / 2 &&
+      mouseY > b.y - b.h / 2 &&
+      mouseY < b.y + b.h / 2
+    ) {
+      hasFishingLine = true;
+      showFishingLine = false;
+      inventory.push('Fishing Line');
+      flashMessage('Picked up: Fishing Line');
+      renderInventory();
     }
   }
 }
 
+let messageSteps = [];
+let currentMessageStep = 0;
+
 function drawScene1() {
-  // (your existing drawing code from draw() goes here)
   fill(128,0,0);
-  rect(0,0, 600);
+  rect(0,0, width, height);
+
   fill(0,0,0);
-  ellipse(200,330, 200, 450);
-  fill(255, 215, 0)
-  rect(120,20,160,130)
-  image(img, 125, 25, 150,120);
+  ellipse(width * 0.33, height * 0.55, width * 0.33, height * 0.75);
+  image(img10, 25, 25, 350, 550);
+  push();
+
+  let boxX = width * 0.4;
+  let boxY = height * 0.14;
+  translate(boxX, boxY);
+  rotate(radians(-12)); // negative for left slant
+  stroke(180, 140, 0);      // dark gold/brown border
+  strokeWeight(4); 
+  fill(255, 215, 0);
+  rect(-width * 0.14, height * .05, width * 0.32, height * 0.14);
+
+  // Draw the image (replace img with jazzSignImg if you loaded it)
+  image(img, -width * 0.13, height * 0.06, width * 0.3, height * 0.12);
+  pop();
+
+ 
+
+  
   
   //translate(mouseX, mouseY);
   //rotate(frameCount * 0.01);
@@ -236,39 +317,76 @@ image(
    // MODIFY: use circleColor for the circle
   fill(circleColor);
   noStroke();
-  circle(width / 2, height / 2, circleSize);
+  //circle(width / 2, height / 2, circleSize);
 
   // --- draw the Key if not collected ---
 if (!hasKey) {
-  // simple “key” icon: a gold circle + small rectangle
   push();
-  noStroke();
-  fill(255, 204, 0); // gold
-  circle(keyX, keyY, keySize);                 // key head
-  rectMode(CENTER);
-  rect(keyX + keySize * 0.5, keyY, keySize * 0.9, keySize * 0.25, 4); // key body
+  imageMode(CENTER);
+  image(
+      envelope,
+      width / 2,      // center horizontally
+      height / 1.5,    // center vertically
+      keySize * 1.5,  // width
+      keySize         // height
+  );
   pop();
 }
 
 }
 
 function drawScene2() {
- 
   fill(128,0,0);
-  rect(0,0, 600, 400);
-  image(img6, 0, 0, 400, 650);
+  rect(0,0, width, height);
+  image(img6, 0, 0, width, height);
+
+  // Animate bartender sliding in
+  if (!bartenderArrived) {
+    bartenderX += 8; // Slide speed
+    if (bartenderX >= bartenderTargetX) {
+      bartenderX = bartenderTargetX;
+      bartenderArrived = true;
+      showTalkButton = true;
+    }
+  }
+
+  image(bartender, bartenderX, height * 0.55, width * 0.42, height * 0.62);
+
+  // Show "Talk" button when bartender arrives
+  if (showTalkButton) {
+    drawTalkButton();
+  }
 
   fish(mouseX,mouseY);
-  
-  let props = instrumentProps[instrumentIndex];
-image(
-  instrumentImages[instrumentIndex],
-  mouseX + props.dx,
-  mouseY + props.dy,
-  props.w,
-  props.h
-);
 
+  let props = instrumentProps[instrumentIndex];
+  image(
+    instrumentImages[instrumentIndex],
+    mouseX + props.dx,
+    mouseY + props.dy,
+    props.w,
+    props.h
+  );
+
+  // Show and animate fishing line after bartender blurb is closed
+  if (showFishingLine && !hasFishingLine) {
+    fishingLineBouncePhase += 0.08;
+    let baseY = height * 0.25;
+    fishingLineY = baseY + Math.sin(fishingLineBouncePhase) * 20;
+
+    let fishingLineX = width * 0.8;
+    let fishingLineW = width * 0.12;         // keep width the same
+    let fishingLineH = height * 0.12;        // make height shorter (was 0.25)
+
+    image(fishingline, fishingLineX, fishingLineY, fishingLineW, fishingLineH);
+
+    window.fishingLineBounds = {
+      x: fishingLineX,
+      y: fishingLineY,
+      w: fishingLineW,
+      h: fishingLineH
+    };
+  }
 }
 
 function drawScene3() {
@@ -362,4 +480,109 @@ function draw() {
 //  textSize(textSizeVal);
   //text("Hello!", width / 2 - 250, height / 2 - 150);
 
+}
+
+function handleInventoryClick(item, idx) {
+  if (item === 'Mission Statement') {
+    showInventoryMessage([
+      'Mission :<br><em>"Agent Phin. The Strategic Hazard Elimination Leviathon League has found evidence of a plot to hijack tonight\'s jazz performance and abduct the prestigious Tank Finatra."</em>',
+      '<em>The short notice of the evidence has left us no choice but to send you under cover on your own. You must discreetly gather information from the spectators and stop this disaster."</em>',
+      '<em>You are our only hope. Good Luck Agent. - S.H.E.L.L."</em>'
+    ]);
+  } else {
+    showInventoryMessage(`You clicked: ${item} thats a suspicious item.`);
+  }
+}
+
+function showInventoryMessage(msgs) {
+  // Accepts either a string or an array of strings
+  messageSteps = Array.isArray(msgs) ? msgs : [msgs];
+  currentMessageStep = 0;
+  const box = document.getElementById('inventory-message');
+  const text = document.getElementById('inventory-message-text');
+  const nextBtn = document.getElementById('inventory-message-next');
+  text.innerHTML = messageSteps[0];
+  box.style.display = 'block';
+  if (messageSteps.length > 1) {
+    nextBtn.style.display = 'inline-block';
+  } else {
+    nextBtn.style.display = 'none';
+  }
+}
+
+document.getElementById('inventory-message-next').addEventListener('click', function() {
+  currentMessageStep++;
+  const text = document.getElementById('inventory-message-text');
+  const nextBtn = document.getElementById('inventory-message-next');
+  if (currentMessageStep < messageSteps.length) {
+    text.innerHTML = messageSteps[currentMessageStep];
+    if (currentMessageStep === messageSteps.length - 1) {
+      nextBtn.style.display = 'none';
+    }
+  }
+});
+
+document.getElementById('inventory-message-close').addEventListener('click', function() {
+  document.getElementById('inventory-message').style.display = 'none';
+  // Only show fishing line after bartender blurb in scene 2
+  if (currentScene === 2 && !hasFishingLine) {
+    showFishingLine = true;
+    fishingLineBouncePhase = 0; // reset animation
+  }
+});
+
+let bartenderX = -400; // Start off-screen left
+let bartenderTargetX;  // Where bartender should stop
+let bartenderArrived = false;
+let showTalkButton = false;
+
+function drawTalkButton() {
+  // Button position to the left of bartender
+  let btnW = 90;
+  let btnH = 40;
+  let btnX = bartenderX - btnW * 0.7; // shift left from bartender
+  let btnY = height * 0.75;
+
+  // Draw button
+  push();
+  rectMode(CENTER);
+  fill(255, 180, 60);
+  stroke(120, 80, 0);
+  strokeWeight(2);
+  rect(btnX, btnY, btnW, btnH, 10);
+  noStroke();
+  fill(60, 30, 0);
+  textAlign(CENTER, CENTER);
+  textSize(18);
+  text("Talk", btnX, btnY);
+  pop();
+
+  // Store button bounds for click detection
+  window.talkBtnBounds = {x: btnX, y: btnY, w: btnW, h: btnH};
+}
+
+let showFishingLine = false;
+let fishingLineY = 0;
+let fishingLineBouncePhase = 0;
+let hasFishingLine = false;
+
+if (showFishingLine && !hasFishingLine) {
+  // Animation: bounce up and down
+  fishingLineBouncePhase += 0.08;
+  let baseY = height * 0.25;
+  fishingLineY = baseY + Math.sin(fishingLineBouncePhase) * 20;
+
+  let fishingLineX = width * 0.8;
+  let fishingLineW = width * 0.12;
+  let fishingLineH = height * 0.25;
+
+  image(fishingline, fishingLineX, fishingLineY, fishingLineW, fishingLineH);
+
+  // Store bounds for click detection
+  window.fishingLineBounds = {
+    x: fishingLineX,
+    y: fishingLineY,
+    w: fishingLineW,
+    h: fishingLineH
+  };
 }
